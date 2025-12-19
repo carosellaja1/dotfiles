@@ -1,0 +1,9 @@
+[user]
+	name = Joe Carosella
+	email = carosellaja1@gmail.com
+[lfs]
+	concurrenttransfers = 3
+[lfs "customtransfer.xet"]
+	path = git-xet
+	args = transfer
+	concurrent = true

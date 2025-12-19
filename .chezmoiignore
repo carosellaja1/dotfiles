@@ -1,0 +1,12 @@
+# Ignore plugins directory - managed by plugin-loader.zsh
+.zsh/plugins/
+
+# Common files to ignore
+.DS_Store
+*.swp
+*.swo
+*~
+
+# ZSH compiled files
+*.zwc
+*.zwc.old
