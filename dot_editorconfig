@@ -1,0 +1,80 @@
+# EditorConfig - https://editorconfig.org
+# Universal editor configuration for consistent coding styles
+
+root = true
+
+# Default settings for all files
+[*]
+charset = utf-8
+end_of_line = lf
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+# Python
+[*.py]
+indent_size = 4
+max_line_length = 88
+
+# Go
+[*.go]
+indent_style = tab
+indent_size = 4
+
+# Rust
+[*.rs]
+indent_size = 4
+max_line_length = 100
+
+# Java/Kotlin
+[*.{java,kt,kts}]
+indent_size = 4
+
+# Swift
+[*.swift]
+indent_size = 4
+
+# Makefiles require tabs
+[Makefile]
+indent_style = tab
+
+[*.mk]
+indent_style = tab
+
+# YAML
+[*.{yml,yaml}]
+indent_size = 2
+
+# Markdown
+[*.md]
+trim_trailing_whitespace = false
+max_line_length = off
+
+# Shell scripts
+[*.{sh,bash,zsh}]
+indent_size = 2
+
+# JSON
+[*.json]
+indent_size = 2
+
+# TypeScript/JavaScript
+[*.{js,jsx,ts,tsx,mjs,cjs}]
+indent_size = 2
+
+# HTML/CSS
+[*.{html,css,scss,sass,less}]
+indent_size = 2
+
+# XML/SVG
+[*.{xml,svg}]
+indent_size = 2
+
+# TOML
+[*.toml]
+indent_size = 2
+
+# Config files
+[*.{conf,cfg,ini}]
+indent_size = 4

@@ -1,0 +1,103 @@
+{
+  "mcpServers": {
+    "context7": {
+      "url": "https://mcp.context7.com/mcp",
+      "headers": {
+        "CONTEXT7_API_KEY": "{{ env "CONTEXT7_API_KEY" }}"
+      }
+    },
+    "fetch": {
+      "command": "uvx",
+      "args": ["mcp-server-fetch"]
+    },
+    "sequential-thinking": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+    "memory": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"]
+    },
+    "vercel": {
+      "type": "http",
+      "url": "https://mcp.vercel.com"
+    },
+    "supabase": {
+      "type": "http",
+      "url": "https://mcp.supabase.com/mcp?features=docs,account,database,debugging,development,functions,branching,storage"
+    },
+    "sentry": {
+      "type": "http",
+      "url": "https://mcp.sentry.dev/mcp"
+    },
+    "vitest": {
+      "command": "npx",
+      "args": ["-y", "@djankies/vitest-mcp"]
+    },
+    "eslint": {
+      "command": "npx",
+      "args": ["-y", "@eslint/mcp@latest"]
+    },
+    "next-devtools": {
+      "command": "npx",
+      "args": ["-y", "next-devtools-mcp@latest"]
+    },
+    "shadcn": {
+      "command": "npx",
+      "args": ["shadcn@latest", "mcp"]
+    },
+    "chrome-devtools": {
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@latest"]
+    },
+    "mapbox-devkit": {
+      "command": "npx",
+      "args": ["-y", "@mapbox/mcp-devkit-server"],
+      "env": {
+        "MAPBOX_ACCESS_TOKEN": "{{ env "MAPBOX_ACCESS_TOKEN" }}"
+      }
+    },
+    "google-maps": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-google-maps"],
+      "env": {
+        "GOOGLE_MAPS_API_KEY": "{{ env "GOOGLE_MAPS_API_KEY" }}"
+      }
+    },
+    "tavily": {
+      "command": "npx",
+      "args": ["-y", "mcp-remote", "https://mcp.tavily.com/mcp/?tavilyApiKey={{ env "TAVILY_API_KEY" }}"]
+    },
+    "perplexity": {
+      "command": "npx",
+      "args": ["-y", "@perplexity-ai/mcp-server"],
+      "env": {
+        "PERPLEXITY_API_KEY": "{{ env "PERPLEXITY_API_KEY" }}"
+      }
+    },
+    "hyperbrowser": {
+      "command": "npx",
+      "args": ["-y", "hyperbrowser-mcp"],
+      "env": {
+        "HYPERBROWSER_API_KEY": "{{ env "HYPERBROWSER_API_KEY" }}"
+      }
+    },
+    "@21st-dev/magic": {
+      "command": "npx",
+      "args": ["-y", "@21st-dev/magic@latest", "API_KEY=\"{{ env "MAGIC_21ST_API_KEY" }}\""]
+    },
+    "graphlit-mcp-server": {
+      "command": "npx",
+      "args": ["-y", "graphlit-mcp-server"],
+      "env": {
+        "GRAPHLIT_ORGANIZATION_ID": "{{ env "GRAPHLIT_ORGANIZATION_ID" }}",
+        "GRAPHLIT_ENVIRONMENT_ID": "{{ env "GRAPHLIT_ENVIRONMENT_ID" }}",
+        "GRAPHLIT_JWT_SECRET": "{{ env "GRAPHLIT_JWT_SECRET" }}"
+      }
+    }
+  }
+}

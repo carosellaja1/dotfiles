@@ -1,0 +1,115 @@
+# direnv standard library extensions
+# https://direnv.net/man/direnv-stdlib.1.html
+
+# Use a specific Python version via pyenv
+use_python() {
+  local version=$1
+  if has pyenv; then
+    eval "$(pyenv init -)"
+    pyenv local "$version"
+  fi
+}
+
+# Layout for Python projects using uv
+layout_uv() {
+  local venv_dir="${1:-.venv}"
+  if [[ ! -d "$venv_dir" ]]; then
+    log_status "Creating uv venv in $venv_dir"
+    uv venv "$venv_dir"
+  fi
+  source "$venv_dir/bin/activate"
+}
+
+# Layout for Python projects with uv sync
+layout_uv_sync() {
+  layout_uv
+  if [[ -f "pyproject.toml" ]]; then
+    log_status "Running uv sync"
+    uv sync
+  fi
+}
+
+# Layout for Poetry projects
+layout_poetry() {
+  if [[ ! -f "pyproject.toml" ]]; then
+    log_error "No pyproject.toml found"
+    return 1
+  fi
+
+  local venv_dir
+  venv_dir=$(poetry env info --path 2>/dev/null)
+
+  if [[ -z "$venv_dir" ]] || [[ ! -d "$venv_dir" ]]; then
+    log_status "Creating poetry virtualenv"
+    poetry install
+    venv_dir=$(poetry env info --path)
+  fi
+
+  export VIRTUAL_ENV="$venv_dir"
+  PATH_add "$venv_dir/bin"
+}
+
+# Use a specific Node.js version via nvm
+use_nvm() {
+  local version=$1
+  if has nvm; then
+    nvm use "$version"
+  elif [[ -f ".nvmrc" ]]; then
+    nvm use
+  fi
+}
+
+# Use a specific Node.js version via fnm
+use_fnm() {
+  local version=${1:-}
+  if has fnm; then
+    if [[ -n "$version" ]]; then
+      fnm use "$version"
+    elif [[ -f ".node-version" ]]; then
+      fnm use
+    elif [[ -f ".nvmrc" ]]; then
+      fnm use
+    fi
+  fi
+}
+
+# Layout for Node.js projects
+layout_node() {
+  PATH_add "node_modules/.bin"
+}
+
+# Use specific Go version
+use_go() {
+  local version=$1
+  export GOROOT="$HOME/.go/$version"
+  PATH_add "$GOROOT/bin"
+}
+
+# Layout for Go projects
+layout_go() {
+  export GOPATH="$PWD/.gopath"
+  PATH_add "$GOPATH/bin"
+  mkdir -p "$GOPATH"
+}
+
+# Load .env file
+dotenv() {
+  local envfile="${1:-.env}"
+  if [[ -f "$envfile" ]]; then
+    log_status "Loading $envfile"
+    dotenv_if_exists "$envfile"
+  fi
+}
+
+# Source .env.local if exists (for local overrides)
+source_env_local() {
+  if [[ -f ".env.local" ]]; then
+    log_status "Loading .env.local"
+    dotenv_if_exists ".env.local"
+  fi
+}
+
+# Strict mode - fail on missing .envrc dependencies
+strict_env() {
+  set -euo pipefail
+}

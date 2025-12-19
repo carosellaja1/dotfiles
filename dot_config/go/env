@@ -1,0 +1,33 @@
+# Go environment configuration
+# Source this file or add these to your shell profile
+# https://go.dev/doc/install/source#environment
+
+# Go binary path (set by Homebrew typically)
+# export GOROOT=/opt/homebrew/opt/go/libexec
+
+# Go workspace
+export GOPATH=$HOME/go
+
+# Add Go binaries to PATH
+export PATH=$GOPATH/bin:$PATH
+
+# Module proxy (default is proxy.golang.org, can add private)
+export GOPROXY=https://proxy.golang.org,direct
+
+# Sum database for module verification
+export GOSUMDB=sum.golang.org
+
+# Private modules that shouldn't use proxy (add your private repos)
+# export GOPRIVATE=github.com/your-org/*
+
+# CGO settings (enable C interop)
+export CGO_ENABLED=1
+
+# Enable Go modules (default in Go 1.16+)
+export GO111MODULE=on
+
+# Go telemetry (opt-out if desired)
+# export GOTELEMETRY=off
+
+# Build cache (useful for CI)
+# export GOCACHE=$HOME/.cache/go-build

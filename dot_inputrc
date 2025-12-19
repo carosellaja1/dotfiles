@@ -1,0 +1,61 @@
+# Readline configuration
+# https://www.gnu.org/software/bash/manual/html_node/Readline-Init-File.html
+# Used by bash, python REPL, and other readline-based programs
+
+# Use vi mode (uncomment to enable, default is emacs mode)
+# set editing-mode vi
+
+# Case-insensitive completion
+set completion-ignore-case on
+
+# Treat hyphens and underscores as equivalent for completion
+set completion-map-case on
+
+# Show all completions at once instead of bell
+set show-all-if-ambiguous on
+
+# Show all completions if there's no partial completion
+set show-all-if-unmodified on
+
+# Add trailing slash to symlinked directories
+set mark-symlinked-directories on
+
+# Color files by types (requires readline 6.3+)
+set colored-stats on
+
+# Color the common prefix
+set colored-completion-prefix on
+
+# Use visible bell instead of audible
+set bell-style visible
+
+# Append file type indicator (*/=>@|) to completions
+set visible-stats on
+
+# Don't expand tilde to home directory
+set expand-tilde off
+
+# Word boundaries for word-based movements
+set skip-completed-text on
+
+# Don't show "Display all X possibilities?" prompt
+set completion-query-items 200
+
+# History search with up/down arrows
+"\e[A": history-search-backward
+"\e[B": history-search-forward
+
+# Ctrl+Left/Right to move word by word
+"\e[1;5C": forward-word
+"\e[1;5D": backward-word
+
+# Better history substring search
+"\e[5~": history-search-backward
+"\e[6~": history-search-forward
+
+# macOS Terminal.app compatible keys
+"\e[H": beginning-of-line
+"\e[F": end-of-line
+
+# Insert mode by default
+set keymap emacs

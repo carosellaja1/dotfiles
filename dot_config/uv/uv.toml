@@ -1,0 +1,26 @@
+# uv configuration
+# https://docs.astral.sh/uv/reference/settings/
+
+# Cache directory (default is fine, but can be customized)
+# cache-dir = "~/.cache/uv"
+
+# Allow pre-release versions when resolving dependencies
+# prerelease = "allow"
+
+# Link mode for installations
+link-mode = "copy"
+
+# Python preference when multiple versions available
+python-preference = "managed"
+
+# Compile Python source files to bytecode
+compile-bytecode = true
+
+# Index strategy for package resolution
+index-strategy = "first-index"
+
+# Keyring provider for authentication
+keyring-provider = "subprocess"
+
+# Resolution strategy
+resolution = "highest"

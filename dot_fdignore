@@ -1,0 +1,63 @@
+# fd ignore patterns (fd-find)
+# https://github.com/sharkdp/fd
+
+# Version control
+.git/
+.svn/
+.hg/
+
+# Dependencies
+node_modules/
+bower_components/
+vendor/
+.venv/
+venv/
+__pycache__/
+.eggs/
+
+# Build outputs
+dist/
+build/
+target/
+out/
+.next/
+.nuxt/
+.output/
+
+# IDE/Editor
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Caches
+.cache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.tox/
+.coverage
+htmlcov/
+.nyc_output/
+
+# Logs
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Lock files (optional - uncomment if desired)
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+# Cargo.lock
+
+# Minified files
+*.min.js
+*.min.css
+
+# Generated
+*.generated.*
+*.g.dart

@@ -1,6 +1,39 @@
 # Ignore plugins directory - managed by plugin-loader.zsh
 .zsh/plugins/
 
+# Repo files (not dotfiles)
+README.md
+LICENSE
+
+# Secrets (only template is managed, not actual secrets)
+.config/secrets/api-keys.env
+
+# IDE state files (not settings)
+.cursor/extensions/
+.cursor/projects/
+.cursor/worktrees/
+.cursor/ai-tracking/
+.cursor/ide_state.json
+.cursor/argv.json
+.claude/.credentials.json
+.claude/history.jsonl
+.claude/stats-cache.json
+.claude/debug/
+.claude/file-history/
+.claude/plans/
+.claude/plugins/
+.claude/projects/
+.claude/session-env/
+.claude/shell-snapshots/
+.claude/statsig/
+.claude/telemetry/
+.claude/todos/
+.claude/ide/
+.claude/downloads/
+.claude/chrome/
+.claude/agents/
+.claude/settings.local.json
+
 # Common files to ignore
 .DS_Store
 *.swp

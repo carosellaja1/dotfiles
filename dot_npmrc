@@ -1,0 +1,26 @@
+# npm configuration
+# https://docs.npmjs.com/cli/configuring-npm/npmrc
+
+# Prefer exact versions when installing
+save-exact=true
+
+# Initialize with MIT license by default
+init-license=MIT
+
+# Use modern lockfile format
+lockfile-version=3
+
+# Audit packages on install
+audit=true
+
+# Show progress bar during install
+progress=true
+
+# Don't fund messages during install
+fund=false
+
+# Engine strict - fail on incompatible node version
+engine-strict=true
+
+# Prefer offline packages if available
+prefer-offline=true

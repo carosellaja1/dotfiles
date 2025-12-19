@@ -1,0 +1,76 @@
+# Goose AI Configuration
+# https://github.com/block/goose
+
+# Provider and model settings
+GOOSE_PROVIDER: openrouter
+GOOSE_MODEL: qwen/qwen3-coder
+
+# Extensions (MCP servers)
+extensions:
+  # Built-in developer tools
+  developer:
+    enabled: true
+    name: developer
+    type: builtin
+
+  # Context7 - documentation lookup
+  context7:
+    enabled: true
+    name: context7
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - "@upstash/context7-mcp"
+
+  # Fetch - web fetching
+  fetch:
+    enabled: true
+    name: fetch
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-fetch"
+
+  # Sequential thinking - structured reasoning
+  sequential-thinking:
+    enabled: true
+    name: sequential-thinking
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-sequential-thinking"
+
+  # Memory - persistent memory
+  memory:
+    enabled: true
+    name: memory
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-memory"
+
+  # Playwright - browser automation
+  playwright:
+    enabled: true
+    name: playwright
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - "@playwright/mcp"
+
+  # Filesystem - file operations
+  filesystem:
+    enabled: true
+    name: filesystem
+    type: stdio
+    cmd: npx
+    args:
+      - -y
+      - "@modelcontextprotocol/server-filesystem"
+      - --allow-dir
+      - "."

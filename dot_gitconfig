@@ -1,9 +1,86 @@
 [user]
 	name = Joe Carosella
 	email = carosellaja1@gmail.com
+
+[core]
+	# Use global gitignore
+	excludesfile = ~/.gitignore_global
+	# Auto-convert CRLF to LF on commit
+	autocrlf = input
+	# Prevent issues with unicode filenames
+	precomposeunicode = true
+	# Use delta for diffs if available (falls back to default)
+	pager = delta --dark 2>/dev/null || less
+
+[init]
+	defaultBranch = main
+
+[pull]
+	rebase = true
+
+[push]
+	autoSetupRemote = true
+	default = current
+
+[fetch]
+	prune = true
+	pruneTags = true
+
+[rebase]
+	autoStash = true
+	autoSquash = true
+
+[merge]
+	conflictstyle = diff3
+
+[diff]
+	algorithm = histogram
+	colorMoved = default
+
+[rerere]
+	enabled = true
+
+[column]
+	ui = auto
+
+[branch]
+	sort = -committerdate
+
+[alias]
+	# Short status
+	s = status -sb
+	# Prettier log
+	lg = log --oneline --graph --decorate --all
+	# Amend without editing message
+	amend = commit --amend --no-edit
+	# Unstage files
+	unstage = reset HEAD --
+	# Show last commit
+	last = log -1 HEAD --stat
+	# List branches sorted by last commit
+	branches = branch -a --sort=-committerdate
+	# Interactive rebase on last n commits
+	reb = "!f() { git rebase -i HEAD~$1; }; f"
+	# Stash with message
+	save = stash push -m
+	# List stashes
+	stashes = stash list
+	# Clean up merged branches
+	cleanup = "!git branch --merged | grep -v '\\*\\|main\\|master' | xargs -n 1 git branch -d"
+
 [lfs]
 	concurrenttransfers = 3
+
 [lfs "customtransfer.xet"]
 	path = git-xet
 	args = transfer
 	concurrent = true
+
+[credential]
+	helper = osxkeychain
+
+[filter "lfs"]
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
+	process = git-lfs filter-process
+	required = true

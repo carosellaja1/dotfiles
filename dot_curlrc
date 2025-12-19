@@ -1,0 +1,47 @@
+# curl configuration
+# https://curl.se/docs/manpage.html
+
+# Follow redirects
+location
+
+# Show error messages
+show-error
+
+# Fail silently on HTTP errors (return non-zero exit code)
+fail
+
+# Retry on transient errors
+retry = 3
+retry-delay = 2
+retry-max-time = 60
+
+# Connection timeout (seconds)
+connect-timeout = 30
+
+# Maximum time for entire operation (seconds)
+max-time = 300
+
+# Use HTTP/2 if available
+# http2
+
+# Progress bar instead of progress meter
+progress-bar
+
+# Compressed response (Accept-Encoding: gzip, deflate)
+compressed
+
+# User agent
+user-agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+
+# Create parent directories for output
+create-dirs
+
+# SSL/TLS settings
+# For self-signed certs (use with caution):
+# insecure
+
+# Use TLS 1.2 minimum
+# tlsv1.2
+
+# Verbose output for debugging (disabled by default)
+# verbose

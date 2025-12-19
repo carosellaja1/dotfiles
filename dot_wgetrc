@@ -1,0 +1,44 @@
+# wget configuration
+# https://www.gnu.org/software/wget/manual/wget.html
+
+# Use timestamping
+timestamping = on
+
+# Retry 3 times on failure
+tries = 3
+
+# Wait 5 seconds between retries
+waitretry = 5
+
+# Timeout for connections
+timeout = 30
+
+# Follow FTP links from HTML files
+follow_ftp = on
+
+# Add .html extension to text/html files
+adjust_extension = on
+
+# Ignore robots.txt (use responsibly)
+# robots = off
+
+# Don't go to parent directories when recursing
+no_parent = on
+
+# Show server response headers
+server_response = on
+
+# Continue partially downloaded files
+continue = on
+
+# Set default user agent
+user_agent = Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
+
+# Don't check SSL certificates (disable for security, enable for self-signed)
+# check_certificate = off
+
+# Use HSTS by default
+hsts = on
+
+# Content disposition for filenames
+content_disposition = on
