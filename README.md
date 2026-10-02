@@ -77,8 +77,9 @@ output, one side has changes the other doesn't.
 ## Per-machine differences
 
 * **Identity and profile**: `.gitconfig` is a template; name, email and the
-  machine profile come from the answers given at `chezmoi init`. Run
-  `chezmoi init` again to change them.
+  machine profile come from the answers given at `chezmoi init`. A plain
+  `chezmoi init` keeps the saved answers; to change them run
+  `chezmoi init --prompt` or edit `~/.config/chezmoi/chezmoi.toml`.
 * **OS**: `.chezmoiignore` skips macOS-only files (iTerm2, Raycast,
   `.zprofile`) on Linux. `.gitconfig` picks `osxkeychain` on macOS and the
   cache helper elsewhere.

@@ -43,8 +43,9 @@ Later files win, and nested objects such as `"[python]"` merge key by key.
 
 ## First time on a machine
 
-1. `chezmoi init` (re-run after pulling this change). It asks for the machine
-   profile; `name` and `email` are remembered from before.
+1. `chezmoi init` (re-run after pulling this change). It asks only for the
+   new machine profile; `name` and `email` are remembered from before. To
+   change a saved answer later, use `chezmoi init --prompt`.
 2. `chezmoi apply`. Before touching Cursor or VS Code it copies their current
    `settings.json`, `keybindings.json` and `snippets/` to
    `~/.config/ide/vscode/backup/<app>/<timestamp>/`, then replaces them with
@@ -114,12 +115,18 @@ Everything else in `options/` (recent projects, window state, SDK tables)
 is machine state and stays local. Edit the two lists at the top of the
 script to change what is shared.
 
-On the first run the newest IDE folder's files are moved into
-`~/.config/jetbrains/`; older folders' copies are renamed `*.bak-<timestamp>`
-next to where they were. After that, if a cleaner deletes the whole
-`PyCharm2025.2` folder, start PyCharm once (it recreates the folder), quit
-it, and run `chezmoi apply` to relink. Nothing was lost because the real
-files are in `~/.config/jetbrains/` and in git.
+On the first run, PyCharm's newest folder is processed first (then other
+products, newest version first), and its files are moved into
+`~/.config/jetbrains/`; every other folder's copies are renamed
+`*.bak-<timestamp>` next to where they were.
+
+The script remembers the newest config folder per product in
+`~/.local/state/jetbrains-link/config-dirs`. If a cleaner deletes the whole
+`PyCharm2025.2` folder, the next `chezmoi apply` recreates it with the
+symlinks in place, so PyCharm starts with its settings and no import wizard.
+Nothing was lost because the real files are in `~/.config/jetbrains/` and in
+git. If you uninstall a product for good, delete its line from that file so
+the folder stops coming back.
 
 Other JetBrains IDEs (IntelliJ, WebStorm, DataGrip, Rider, ...) are linked
 the same way when present, so they pick up the same keymap and code style.

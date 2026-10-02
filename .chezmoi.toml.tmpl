@@ -1,6 +1,7 @@
 {{/* This file generates ~/.config/chezmoi/chezmoi.toml on each machine.
-     Values are asked for ONCE on `chezmoi init` and then remembered locally.
-     Re-run `chezmoi init` to be asked again. */ -}}
+     Values are asked for ONCE on `chezmoi init` and then remembered locally;
+     a plain `chezmoi init` reuses them. To change them, run
+     `chezmoi init --prompt` or edit ~/.config/chezmoi/chezmoi.toml. */ -}}
 {{- $name := promptStringOnce . "name" "Full name for git commits" "Joe Carosella" -}}
 {{- $email := promptStringOnce . "email" "Email for git commits" -}}
 {{- $profile := promptChoiceOnce . "profile" "Machine profile (IDE settings overlay)" (list "personal" "work") "personal" -}}

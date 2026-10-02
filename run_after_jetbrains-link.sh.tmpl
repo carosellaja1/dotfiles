@@ -2,6 +2,7 @@
 # Links the portable parts of every JetBrains IDE config folder to the
 # chezmoi-managed ~/.config/jetbrains. Runs after every `chezmoi apply`;
 # it is idempotent and prints nothing when there is nothing to do.
+# Written for the bash 3.2 that ships with macOS: no mapfile, no sort -V.
 set -euo pipefail
 
 SHARED="{{ .chezmoi.homeDir }}/.config/jetbrains"
@@ -10,6 +11,10 @@ ROOT="{{ .chezmoi.homeDir }}/Library/Application Support/JetBrains"
 {{ else -}}
 ROOT="{{ .chezmoi.homeDir }}/.config/JetBrains"
 {{ end -}}
+# Remembers the newest config folder per product (e.g. "PyCharm<TAB>PyCharm2025.2")
+# so a folder a cleanup app deleted is recreated, with its links, on the next
+# apply. Delete a line to stop recreating a product you uninstalled.
+STATE="{{ .chezmoi.homeDir }}/.local/state/jetbrains-link/config-dirs"
 
 # Whole directories that are safe to share between machines and products.
 DIRS=(keymaps codestyles colors templates fileTemplates inspection)
@@ -24,9 +29,35 @@ OPTIONS=(
   vcs.xml git.xml terminal.xml
 )
 
+PRODUCTS='^(PyCharm|PyCharmCE|IntelliJIdea|IdeaIC|WebStorm|DataGrip|Rider|GoLand|CLion|PhpStorm|RubyMine|RustRover)$'
+TAB=$'\t'
+
 [[ -d "$ROOT" ]] || exit 0
-mkdir -p "$SHARED"
+mkdir -p "$SHARED" "$(dirname "$STATE")"
+[[ -f "$STATE" ]] || : > "$STATE"
 stamp=$(date +%Y%m%d%H%M%S)
+
+# 1. Recreate remembered config folders that have gone missing, so the IDE
+#    finds its settings already linked the next time it starts.
+while IFS="$TAB" read -r product name; do
+  [[ -n "$name" && ! -e "$ROOT/$name" ]] || continue
+  echo "jetbrains: $ROOT/$name is missing; recreating it with shared settings"
+  mkdir -p "$ROOT/$name/options"
+done < "$STATE"
+
+# 2. List present config folders: PyCharm first, then newest version first,
+#    so PyCharm's settings seed the shared directory on the first import.
+present=$(
+  for d in "$ROOT"/*/; do
+    [[ -d "$d" ]] || continue
+    name=$(basename "$d")
+    [[ "$name" =~ ^([A-Za-z]+)([0-9]+)\.([0-9]+)$ ]] || continue
+    product="${BASH_REMATCH[1]}"; major="${BASH_REMATCH[2]}"; minor="${BASH_REMATCH[3]}"
+    [[ "$product" =~ $PRODUCTS ]] || continue
+    prio=1; [[ "$product" == PyCharm* ]] && prio=0
+    printf '%s\t%s\t%s\t%s\t%s\n' "$prio" "$major" "$minor" "$product" "$name"
+  done | sort -t "$TAB" -k1,1n -k2,2nr -k3,3nr -k4,4
+)
 
 # Replace $src with a symlink to $dst. Existing real content is moved into
 # $dst when $dst is empty (first run), otherwise backed up next to $src.
@@ -53,14 +84,20 @@ link() {
   echo "jetbrains: linked $src"
 }
 
-# Newest version first so its settings win on the first import.
-while IFS= read -r cfg; do
-  name=$(basename "$cfg")
-  [[ "$name" =~ ^(PyCharm|PyCharmCE|IntelliJIdea|IdeaIC|WebStorm|DataGrip|Rider|GoLand|CLion|PhpStorm|RubyMine|RustRover)[0-9] ]] || continue
+# 3. Link every present folder and remember the newest one per product.
+seen=" "
+new_state=""
+while IFS="$TAB" read -r prio major minor product name; do
+  [[ -n "$name" ]] || continue
   for d in "${DIRS[@]}"; do
-    link "$cfg/$d" "$SHARED/$d" dir
+    link "$ROOT/$name/$d" "$SHARED/$d" dir
   done
   for f in "${OPTIONS[@]}"; do
-    link "$cfg/options/$f" "$SHARED/options/$f" file
+    link "$ROOT/$name/options/$f" "$SHARED/options/$f" file
   done
-done < <(find "$ROOT" -mindepth 1 -maxdepth 1 -type d | sort -rV)
+  if [[ "$seen" != *" $product "* ]]; then
+    seen="$seen$product "
+    new_state="$new_state$product$TAB$name"$'\n'
+  fi
+done <<< "$present"
+printf '%s' "$new_state" > "$STATE"

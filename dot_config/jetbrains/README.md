@@ -11,4 +11,5 @@ The first time, whatever the IDE already has is moved in here, so nothing is
 lost. Then run `chezmoi add ~/.config/jetbrains` to start syncing it.
 
 If a cleaner app deletes `~/Library/Application Support/JetBrains/PyCharm*`,
-the real settings are still here; run `chezmoi apply` to relink.
+the real settings are still here; `chezmoi apply` recreates the folder with
+the links (it remembers folder names in ~/.local/state/jetbrains-link/).
