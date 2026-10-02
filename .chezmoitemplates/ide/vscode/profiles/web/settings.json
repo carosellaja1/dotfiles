@@ -1,0 +1,5 @@
+{
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "typescript.preferences.importModuleSpecifier": "non-relative",
+  "tailwindCSS.emmetCompletions": true
+}

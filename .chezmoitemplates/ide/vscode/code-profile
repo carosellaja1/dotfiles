@@ -1,0 +1,31 @@
+{{- /* Renders a VS Code / Cursor profile export (.code-profile) for a workload
+       profile. Import it with "Profiles: Import Profile..." in either app.
+       Usage: {{ template "ide/vscode/code-profile" (dict "root" . "name" "python") }}
+       Settings = base -> machine profile -> profiles/<name>/settings.json
+       Extensions = base + machine profile + profiles/<name>/extensions.txt */ -}}
+{{- $root := .root -}}
+{{- $name := .name -}}
+{{- $base := include ".chezmoitemplates/ide/vscode/settings.base.json" | fromJson -}}
+{{- $machine := include (printf ".chezmoitemplates/ide/vscode/settings.%s.json" $root.profile) | fromJson -}}
+{{- $workload := include (printf ".chezmoitemplates/ide/vscode/profiles/%s/settings.json" $name) | fromJson -}}
+{{- $settings := mergeOverwrite (deepCopy $base) $machine $workload -}}
+{{- $kb := concat (include ".chezmoitemplates/ide/vscode/keybindings.base.json" | fromJson) (include (printf ".chezmoitemplates/ide/vscode/keybindings.%s.json" $root.profile) | fromJson) -}}
+{{- $platform := 2 -}}
+{{- if eq $root.chezmoi.os "darwin" }}{{ $platform = 1 }}{{ end -}}
+{{- $ids := list -}}
+{{- $lists := list (include ".chezmoitemplates/ide/vscode/extensions.base.txt") (include (printf ".chezmoitemplates/ide/vscode/extensions.%s.txt" $root.profile)) (include (printf ".chezmoitemplates/ide/vscode/profiles/%s/extensions.txt" $name)) -}}
+{{- range $lists -}}
+{{-   range (. | splitList "\n") -}}
+{{-     $line := trim . -}}
+{{-     if and $line (not (hasPrefix "#" $line)) -}}
+{{-       $ids = append $ids (dict "identifier" (dict "id" $line)) -}}
+{{-     end -}}
+{{-   end -}}
+{{- end -}}
+{
+  "name": {{ $name | title | toJson }},
+  "settings": {{ dict "settings" ($settings | toJson) | toJson | toJson }},
+  "keybindings": {{ dict "keybindings" ($kb | toJson) "platform" $platform | toJson | toJson }},
+  "extensions": {{ $ids | toJson | toJson }},
+  "snippets": {{ dict "snippets" (dict) | toJson | toJson }}
+}

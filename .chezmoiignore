@@ -3,6 +3,7 @@
 # Repo-only files
 README.md
 LICENSE
+docs/
 
 # ---------------------------------------------------------------------------
 # Secrets and per-machine state. These must never be managed by chezmoi, even
@@ -40,6 +41,9 @@ LICENSE
 .claude/settings.local.json
 .serena/language_servers/
 
+# Local backups made by run_before_ide-backup.sh
+.config/ide/vscode/backup/
+
 # Zsh plugins are cloned at runtime by ~/.zsh/plugin-loader.zsh
 .zsh/plugins/
 
@@ -58,4 +62,9 @@ LICENSE
 .config/iterm2
 .config/raycast
 .zprofile
+Library
+{{ else -}}
+# Linux-only IDE paths, skipped on macOS (which uses ~/Library/Application Support)
+.config/Code
+.config/Cursor
 {{ end -}}

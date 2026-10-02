@@ -123,6 +123,7 @@ export LOCALAGI_CUSTOM_ACTIONS_DIR="$HOME/Projects/LocalAGI/example/custom_actio
 typeset -U path  # Keep PATH entries unique
 
 path=(
+  "$HOME/.local/bin"
   "$GOPATH/bin"
   "$PNPM_HOME"
   "$HOME/.lmstudio/bin"

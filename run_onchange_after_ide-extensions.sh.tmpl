@@ -1,0 +1,36 @@
+#!/bin/bash
+# Installs the extension lists into the DEFAULT profile of Cursor and VS Code.
+# Re-runs only when a list changes (chezmoi hashes this rendered script):
+#   base:    {{ include ".chezmoitemplates/ide/vscode/extensions.base.txt" | sha256sum }}
+#   machine: {{ include (printf ".chezmoitemplates/ide/vscode/extensions.%s.txt" .profile) | sha256sum }}
+# Workload profiles (python, web) get their extensions when you import the
+# .code-profile files; see docs/ide.md.
+set -uo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+export PATH="/opt/homebrew/bin:/usr/local/bin:/Applications/Visual Studio Code.app/Contents/Resources/app/bin:/Applications/Cursor.app/Contents/Resources/app/bin:$PATH"
+{{ end -}}
+
+extensions=(
+{{- range (list (include ".chezmoitemplates/ide/vscode/extensions.base.txt") (include (printf ".chezmoitemplates/ide/vscode/extensions.%s.txt" .profile))) }}
+{{-   range (. | splitList "\n") }}
+{{-     $line := trim . }}
+{{-     if and $line (not (hasPrefix "#" $line)) }}
+  {{ $line | quote }}
+{{-     end }}
+{{-   end }}
+{{- end }}
+)
+
+for cli in code cursor; do
+  if ! command -v "$cli" >/dev/null 2>&1; then
+    echo "ide-extensions: $cli CLI not found, skipping"
+    continue
+  fi
+  installed=$("$cli" --list-extensions 2>/dev/null | tr '[:upper:]' '[:lower:]')
+  for ext in "${extensions[@]}"; do
+    if grep -qix "$ext" <<<"$installed"; then continue; fi
+    echo "ide-extensions: $cli installing $ext"
+    "$cli" --install-extension "$ext" --force >/dev/null || echo "ide-extensions: $cli failed to install $ext" >&2
+  done
+done

@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+# Copy the settings you currently have in Cursor (default) or VS Code into
+# the dotfiles repo as the shared base. Run it once per machine, before or
+# after the first `chezmoi apply` (apply backs the originals up first). After
+# that the app files are symlinks and `chezmoi diff` shows anything you change
+# in the IDE.
+#
+#   ide-capture            # from Cursor
+#   ide-capture code       # from VS Code
+set -euo pipefail
+
+app="${1:-cursor}"
+case "$app" in
+  cursor) dirname="Cursor" ;;
+  code)   dirname="Code" ;;
+  *) echo "usage: ide-capture [cursor|code]" >&2; exit 2 ;;
+esac
+
+if [[ "$(uname -s)" == Darwin ]]; then
+  user_dir="$HOME/Library/Application Support/$dirname/User"
+else
+  user_dir="$HOME/.config/$dirname/User"
+fi
+
+src="$(chezmoi source-path)/.chezmoitemplates/ide/vscode"
+snippets_dst="$(chezmoi source-path)/dot_config/ide/vscode/snippets"
+
+# Where to read from: the live files if they are still real files, otherwise the
+# newest backup that run_before_ide-backup.sh made when chezmoi took them over.
+from_dir="$user_dir"
+if [[ -L "$user_dir/settings.json" || ! -e "$user_dir/settings.json" ]]; then
+  backup_root="$HOME/.config/ide/vscode/backup/$app"
+  from_dir=$(ls -1d "$backup_root"/*/ 2>/dev/null | sort | tail -n 1 || true)
+  if [[ -z "$from_dir" ]]; then
+    echo "ide-capture: $user_dir/settings.json is already managed (or absent) and no backup exists."
+    echo "Use 'chezmoi diff' to see what you changed in the IDE, then move those keys"
+    echo "into the right file under $src"
+    exit 0
+  fi
+  from_dir="${from_dir%/}"
+  echo "ide-capture: reading from backup $from_dir"
+fi
+
+# settings.json may contain // comments and trailing commas; normalise to JSON.
+normalise() {
+  python3 - "$1" <<'PYEOF'
+import json, re, sys
+text = open(sys.argv[1], encoding="utf-8").read()
+text = re.sub(r'/\*.*?\*/', '', text, flags=re.S)                 # block comments
+text = re.sub(r'^\s*//.*$', '', text, flags=re.M)                 # full-line comments
+text = re.sub(r',(\s*[}\]])', r'\1', text)                         # trailing commas
+data = json.loads(text or "{}")
+print(json.dumps(data, indent=2, ensure_ascii=False))
+PYEOF
+}
+
+if [[ -f "$from_dir/settings.json" ]]; then
+  normalise "$from_dir/settings.json" > "$src/settings.base.json"
+  echo "ide-capture: wrote $src/settings.base.json"
+fi
+if [[ -f "$from_dir/keybindings.json" ]]; then
+  normalise "$from_dir/keybindings.json" > "$src/keybindings.base.json"
+  echo "ide-capture: wrote $src/keybindings.base.json"
+fi
+if [[ -d "$from_dir/snippets" ]] && [[ -n "$(ls -A "$from_dir/snippets")" ]]; then
+  mkdir -p "$snippets_dst"
+  cp -a "$from_dir/snippets/." "$snippets_dst/"
+  echo "ide-capture: copied snippets to $snippets_dst"
+fi
+if command -v "$app" >/dev/null 2>&1; then
+  {
+    echo "# Captured from $app on $(hostname) $(date +%F). Prune to what you want everywhere;"
+    echo "# move workload-specific ones into profiles/<name>/extensions.txt"
+    "$app" --list-extensions
+  } > "$src/extensions.base.txt"
+  echo "ide-capture: wrote $src/extensions.base.txt"
+fi
+
+echo
+echo "Next: review with 'chezmoi cd && git diff', split machine- or workload-specific"
+echo "keys into the overlay files, then 'chezmoi apply' to render them into the IDE."

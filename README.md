@@ -69,15 +69,16 @@ An existing `~/.oh-my-zsh` git clone is replaced by the chezmoi-managed copy.
 | Pull from GitHub and apply | `chezmoi update` |
 | What is managed / not managed | `chezmoi managed` / `chezmoi unmanaged` |
 | Refresh oh-my-zsh and plugins now | `chezmoi apply --refresh-externals` |
-| Something looks wrong | `chezmoi doctor`, `chezmoi apply -n -v` |
+| Something looks wrong | `chezmoi doctor`, `chezmoi apply -n -v`, `chezmoi verify --exclude scripts` |
 
 Keep the source and the target in sync in your head: if `chezmoi diff` shows
 output, one side has changes the other doesn't.
 
 ## Per-machine differences
 
-* **Identity**: `.gitconfig` is a template; name and email come from the
-  answers given at `chezmoi init`. Run `chezmoi init` again to change them.
+* **Identity and profile**: `.gitconfig` is a template; name, email and the
+  machine profile come from the answers given at `chezmoi init`. Run
+  `chezmoi init` again to change them.
 * **OS**: `.chezmoiignore` skips macOS-only files (iTerm2, Raycast,
   `.zprofile`) on Linux. `.gitconfig` picks `osxkeychain` on macOS and the
   cache helper elsewhere.
@@ -99,6 +100,15 @@ To add another per-machine value, put a `promptStringOnce` line in
   `age` or pulling from a password manager; see
   <https://www.chezmoi.io/user-guide/password-managers/>.
 
+## IDE settings
+
+Cursor, VS Code and JetBrains (PyCharm first) share one source of truth with
+a machine profile (`personal` / `work`, chosen at `chezmoi init`) and
+switchable workload profiles (`python`, `web`) inside Cursor and VS Code.
+JetBrains settings are relinked by every `chezmoi apply`, so a cleanup app
+deleting `PyCharm2025.x` costs nothing. See [docs/ide.md](docs/ide.md) for
+the layout, the first-time capture step and the day-to-day commands.
+
 ## What's managed
 
 | Area | Files |
@@ -108,6 +118,7 @@ To add another per-machine value, put a `promptStringOnce` line in
 | CLI tools | `.config/bat/config`, `.ripgreprc`, `.fdignore`, `.curlrc`, `.wgetrc`, `.config/gh/config.yml`, `.config/direnv/direnvrc` |
 | Languages | `.config/pip/pip.conf`, `.config/uv/uv.toml`, `.config/ruff/ruff.toml`, `.config/go/env`, `.npmrc`, `.condarc`, `.editorconfig`, `.prettierrc` |
 | AI tooling | `.claude/settings.json`, `.claude/CLAUDE.md`, `.cursor/mcp.json` (template), `.config/zed/settings.json` (template), `.config/goose/config.yaml`, `.serena/serena_config.yml` |
+| IDEs | `.config/ide/vscode/` (rendered Cursor + VS Code settings, keybindings, snippets, profile exports), `.config/jetbrains/` (shared PyCharm/JetBrains settings), `.local/bin/ide-capture` |
 | macOS only | `.config/iterm2/`, `.config/raycast/` (settings only, never tokens) |
 
 ## Layout of this repo
@@ -118,6 +129,11 @@ To add another per-machine value, put a `promptStringOnce` line in
 | `.chezmoiignore` | What not to write to `~`, including OS-specific skips |
 | `.chezmoiexternal.toml` | Third-party downloads (oh-my-zsh and plugins) |
 | `run_onchange_darwin-install-packages.sh.tmpl` | Homebrew package list; re-runs when the list changes |
+| `run_before_ide-backup.sh.tmpl` | Backs up real Cursor/VS Code settings before they become symlinks |
+| `run_onchange_after_ide-extensions.sh.tmpl` | Installs the extension lists; re-runs when a list changes |
+| `run_after_jetbrains-link.sh.tmpl` | Links every JetBrains config folder to `~/.config/jetbrains` |
+| `.chezmoitemplates/ide/` | Settings data files and the templates that merge them |
+| `docs/` | Longer guides, not applied to `~` |
 | `dot_*`, `private_dot_*` | The dotfiles themselves |
 | `*.tmpl` | Files rendered with Go templates per machine |
 | `.gitignore` | Safety net against committing secrets |

@@ -3,10 +3,12 @@
      Re-run `chezmoi init` to be asked again. */ -}}
 {{- $name := promptStringOnce . "name" "Full name for git commits" "Joe Carosella" -}}
 {{- $email := promptStringOnce . "email" "Email for git commits" -}}
+{{- $profile := promptChoiceOnce . "profile" "Machine profile (IDE settings overlay)" (list "personal" "work") "personal" -}}
 
 [data]
     name = {{ $name | quote }}
     email = {{ $email | quote }}
+    profile = {{ $profile | quote }}
 
 [diff]
     # Don't show the full contents of run_* scripts in `chezmoi diff`

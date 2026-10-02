@@ -1,0 +1,33 @@
+#!/bin/bash
+# Runs before every `chezmoi apply`. If Cursor or VS Code still has real
+# settings files (not yet the chezmoi symlinks), copy them to
+# ~/.config/ide/vscode/backup/<app>/<timestamp>/ first so taking over the
+# files never loses anything. `ide-capture <app>` reads from that backup.
+# After the takeover the files are symlinks and this script does nothing.
+set -euo pipefail
+
+{{ if eq .chezmoi.os "darwin" -}}
+BASE="{{ .chezmoi.homeDir }}/Library/Application Support"
+{{ else -}}
+BASE="{{ .chezmoi.homeDir }}/.config"
+{{ end -}}
+BACKUP_ROOT="{{ .chezmoi.homeDir }}/.config/ide/vscode/backup"
+stamp=$(date +%Y%m%d%H%M%S)
+
+for app in Code Cursor; do
+  user_dir="$BASE/$app/User"
+  [[ -d "$user_dir" ]] || continue
+  dest=""
+  for item in settings.json keybindings.json snippets; do
+    [[ -e "$user_dir/$item" && ! -L "$user_dir/$item" ]] || continue
+    if [[ -z "$dest" ]]; then
+      dest="$BACKUP_ROOT/$(tr '[:upper:]' '[:lower:]' <<<"$app")/$stamp"
+      mkdir -p "$dest"
+    fi
+    cp -a "$user_dir/$item" "$dest/"
+  done
+  if [[ -n "$dest" ]]; then
+    echo "ide-backup: saved existing $app settings to $dest"
+    echo "ide-backup: run 'ide-capture $(tr '[:upper:]' '[:lower:]' <<<"$app")' to bring them into the dotfiles repo"
+  fi
+done

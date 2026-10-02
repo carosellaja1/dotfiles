@@ -1,0 +1,5 @@
+{{- /* Renders keybindings.json: base list followed by the machine profile's list.
+       Usage: {{ template "ide/vscode/keybindings" . }} */ -}}
+{{- $base := include ".chezmoitemplates/ide/vscode/keybindings.base.json" | fromJson -}}
+{{- $machine := include (printf ".chezmoitemplates/ide/vscode/keybindings.%s.json" .profile) | fromJson -}}
+{{ concat $base $machine | toPrettyJson }}
