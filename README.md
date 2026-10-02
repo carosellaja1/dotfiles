@@ -1,279 +1,142 @@
-# Dotfiles
+# dotfiles
 
-Personal dotfiles managed with [chezmoi](https://chezmoi.io/).
+My shell, git, editor and CLI configuration, synced between machines with
+[chezmoi](https://chezmoi.io).
 
-## Quick Start
+## The mental model
 
-### Install chezmoi and dotfiles on a new machine
+chezmoi keeps **two copies** of every config file:
+
+| Copy | Where | Role |
+|------|-------|------|
+| Source | `~/.local/share/chezmoi` (this repo, cloned) | What's in git. Filenames use prefixes: `dot_zshrc` becomes `~/.zshrc`, `private_` means mode 0600, `.tmpl` means "fill in per machine". |
+| Target | `~/.zshrc`, `~/.config/...` | The real files your tools read. |
+
+You never edit the source copy by hand-cloning this repo into `~`. Instead:
+
+```
+   edit  ──>  chezmoi apply  ──>  ~ (target)
+ source                            ▲
+   ▲                               │
+   └── git push ─── other machine ── chezmoi update
+```
+
+* `chezmoi edit ~/.zshrc` opens the source copy; `chezmoi apply` writes it to `~`.
+* `git push` from the source dir (`chezmoi cd`) publishes it.
+* `chezmoi update` on another machine pulls and applies.
+
+## New machine
 
 ```bash
-# One-liner install (replace with your repo)
+# macOS: install Xcode CLT and Homebrew first (https://brew.sh)
 sh -c "$(curl -fsLS get.chezmoi.io)" -- init --apply carosellaja1
-
-# Or with Homebrew
-brew install chezmoi
-chezmoi init --apply https://github.com/carosellaja1/dotfiles.git
 ```
 
-### Install on a machine with existing dotfiles
+That one command:
+
+1. Installs chezmoi and clones this repo to `~/.local/share/chezmoi`.
+2. Asks for your **name** and **email** once (used in `.gitconfig`) and stores
+   them in `~/.config/chezmoi/chezmoi.toml`, which stays local.
+3. Downloads oh-my-zsh, powerlevel10k and zsh-autosuggestions
+   (`.chezmoiexternal.toml`).
+4. On macOS, installs the CLI tools the configs depend on via Homebrew
+   (`run_onchange_darwin-install-packages.sh.tmpl`).
+5. Writes every managed file into `~`.
+
+Then set up API keys, which are the only thing not synced:
 
 ```bash
-chezmoi init https://github.com/carosellaja1/dotfiles.git
-chezmoi diff    # Review changes before applying
-chezmoi apply   # Apply changes
-```
-
-## Daily Usage
-
-| Command | Description |
-|---------|-------------|
-| `chezmoi add ~/.config/foo` | Add a new dotfile to be managed |
-| `chezmoi edit ~/.zshrc` | Edit a managed file (opens in source dir) |
-| `chezmoi diff` | Preview pending changes |
-| `chezmoi apply` | Apply changes to home directory |
-| `chezmoi update` | Pull latest from remote and apply |
-| `chezmoi cd` | cd into the chezmoi source directory |
-| `chezmoi managed` | List all managed files |
-| `chezmoi unmanaged` | List files in home not managed by chezmoi |
-
-## Common Workflows
-
-### Edit a dotfile
-
-```bash
-# Option 1: Edit source and apply
-chezmoi edit ~/.zshrc
-chezmoi apply
-
-# Option 2: Edit in place, then re-add
-vim ~/.zshrc
-chezmoi re-add
-```
-
-### Add a new config file
-
-```bash
-chezmoi add ~/.config/starship.toml
-chezmoi cd
-git add -A && git commit -m "Add starship config"
-git push
-```
-
-### Add a private/secret file
-
-```bash
-# Files with sensitive data (permissions set to 0600)
-chezmoi add --encrypt ~/.ssh/config
-# Or add to private directory
-chezmoi add ~/.config/gh/config.yml  # Stored as private_dot_config/gh/
-```
-
-### Preview changes before applying
-
-```bash
-chezmoi diff
-chezmoi diff ~/.zshrc  # Diff specific file
-```
-
-### Pull and apply updates from remote
-
-```bash
-chezmoi update        # git pull + apply
-chezmoi update -n     # Dry run (preview only)
-```
-
-### Discard local changes
-
-```bash
-chezmoi apply --force  # Overwrite home files with source
-```
-
-## File Naming Convention
-
-chezmoi uses special prefixes in the source directory:
-
-| Prefix | Meaning | Example |
-|--------|---------|---------|
-| `dot_` | Becomes `.` | `dot_zshrc` → `.zshrc` |
-| `private_` | Mode 0600 | `private_dot_ssh/` → `.ssh/` (private) |
-| `executable_` | Mode +x | `executable_script.sh` → `script.sh` |
-| `empty_` | Create empty file | `empty_dot_gitkeep` → `.gitkeep` |
-| `symlink_` | Create symlink | `symlink_dot_vim` → `.vim` (symlink) |
-| `modify_` | Modify existing file | Runs script to modify target |
-| `.tmpl` | Template file | Processed with Go templates |
-
-## What's Included
-
-### Shell
-- `.zshrc` - Zsh configuration with aliases, functions, completions
-- `.zprofile` - Login shell environment
-- `.p10k.zsh` - Powerlevel10k prompt theme
-- `.inputrc` - Readline configuration
-
-### Git
-- `.gitconfig` - Git settings, aliases, and global gitignore
-- `.gitignore_global` - Global ignore patterns
-
-### Editor/Formatting
-- `.editorconfig` - Universal editor settings
-- `.prettierrc` - Prettier formatter config
-
-### CLI Tools
-- `.config/bat/config` - bat (cat replacement) theme
-- `.config/starship.toml` - Starship prompt (alternative to p10k)
-- `.ripgreprc` - ripgrep search defaults
-- `.fdignore` - fd (find replacement) ignore patterns
-- `.wgetrc` / `.curlrc` - Download tool defaults
-
-### Languages
-- `.config/pip/pip.conf` - Python pip configuration
-- `.config/uv/uv.toml` - uv (Python) configuration
-- `.config/ruff/ruff.toml` - Python linter/formatter
-- `.config/go/env` - Go environment variables
-- `.npmrc` - npm configuration
-- `.condarc` - Conda configuration
-
-### Other
-- `.config/direnv/direnvrc` - direnv helpers (layout_uv, etc.)
-- `.config/gh/config.yml` - GitHub CLI configuration
-- `.config/fish/config.fish` - Fish shell config
-
-### AI/Coding Agents
-- `.claude/settings.json` - Claude Code plugin settings
-- `.claude/CLAUDE.md` - Claude Code memory/instructions
-- `.cursor/mcp.json` - Cursor MCP server configuration (templated)
-- `.config/zed/settings.json` - Zed editor settings (templated)
-- `.config/goose/config.yaml` - Goose AI configuration
-
-## API Keys & Secrets Setup
-
-IDE configs like Cursor and Zed use MCP servers that require API keys. These are managed via environment variables to avoid committing secrets to git.
-
-### 1. Copy the secrets template
-
-```bash
-mkdir -p ~/.config/secrets
-cp ~/.config/secrets/api-keys.env.tmpl ~/.config/secrets/api-keys.env
+cp ~/.config/secrets/api-keys.env.example ~/.config/secrets/api-keys.env
 chmod 600 ~/.config/secrets/api-keys.env
+$EDITOR ~/.config/secrets/api-keys.env   # fill in what you use
+exec zsh && chezmoi apply                # re-render ~/.cursor/mcp.json and Zed settings
 ```
 
-### 2. Fill in your API keys
+If the machine already has dotfiles, use `chezmoi init carosellaja1` (no
+`--apply`), then `chezmoi diff` to review and `chezmoi apply` when happy.
+An existing `~/.oh-my-zsh` git clone is replaced by the chezmoi-managed copy.
 
-Edit `~/.config/secrets/api-keys.env` and add your keys:
+## Day to day
 
-```bash
-export ANTHROPIC_API_KEY="sk-ant-..."
-export OPENAI_API_KEY="sk-..."
-export CONTEXT7_API_KEY="ctx7sk-..."
-# ... etc
-```
+| Task | Command |
+|------|---------|
+| Change a managed file | `chezmoi edit ~/.zshrc` then `chezmoi apply` |
+| Edited the real file directly? Pull the change back in | `chezmoi re-add ~/.zshrc` |
+| Start managing a new file | `chezmoi add ~/.config/foo/config` |
+| Stop managing a file (keeps the real one) | `chezmoi forget ~/.config/foo/config` |
+| See what `apply` would change | `chezmoi diff` |
+| Push to GitHub | `chezmoi cd` then `git add -A && git commit && git push` |
+| Pull from GitHub and apply | `chezmoi update` |
+| What is managed / not managed | `chezmoi managed` / `chezmoi unmanaged` |
+| Refresh oh-my-zsh and plugins now | `chezmoi apply --refresh-externals` |
+| Something looks wrong | `chezmoi doctor`, `chezmoi apply -n -v`, `chezmoi verify --exclude scripts` |
 
-### 3. Source the secrets file
+Keep the source and the target in sync in your head: if `chezmoi diff` shows
+output, one side has changes the other doesn't.
 
-Add to your `.zshrc` (or it's already there if you use this repo):
+## Per-machine differences
 
-```bash
-[[ -f ~/.config/secrets/api-keys.env ]] && source ~/.config/secrets/api-keys.env
-```
+* **Identity and profile**: `.gitconfig` is a template; name, email and the
+  machine profile come from the answers given at `chezmoi init`. A plain
+  `chezmoi init` keeps the saved answers; to change them run
+  `chezmoi init --prompt` or edit `~/.config/chezmoi/chezmoi.toml`.
+* **OS**: `.chezmoiignore` skips macOS-only files (iTerm2, Raycast,
+  `.zprofile`) on Linux. `.gitconfig` picks `osxkeychain` on macOS and the
+  cache helper elsewhere.
+* **Paths**: nothing hardcodes a username. Templates use
+  `{{ .chezmoi.homeDir }}`; shell files use `$HOME`.
 
-### 4. Apply chezmoi templates
+To add another per-machine value, put a `promptStringOnce` line in
+`.chezmoi.toml.tmpl` and use `{{ .thatValue }}` in a `.tmpl` file.
 
-```bash
-source ~/.config/secrets/api-keys.env
-chezmoi apply
-```
+## Secrets
 
-The templated configs (`.tmpl` files) will be populated with your environment variables.
+* Real keys live in `~/.config/secrets/api-keys.env`, sourced by `.zshrc`.
+  Templates read them with `{{ env "NAME" }}` at `chezmoi apply` time, so run
+  `apply` from a shell that has sourced the file.
+* That file, `~/.config/gh/hosts.yml`, Raycast's `config.json` and Claude's
+  credentials are listed in both `.chezmoiignore` and this repo's `.gitignore`,
+  so neither `chezmoi add` nor `git add` can sync them.
+* If you want to sync secrets too, chezmoi supports encrypting files with
+  `age` or pulling from a password manager; see
+  <https://www.chezmoi.io/user-guide/password-managers/>.
 
-### Important: Never commit secrets!
+## IDE settings
 
-The actual `api-keys.env` file is gitignored. Only the `.tmpl` template is committed.
+Cursor, VS Code and JetBrains (PyCharm first) share one source of truth with
+a machine profile (`personal` / `work`, chosen at `chezmoi init`) and
+switchable workload profiles (`python`, `web`) inside Cursor and VS Code.
+JetBrains settings are relinked by every `chezmoi apply`, so a cleanup app
+deleting `PyCharm2025.x` costs nothing. See [docs/ide.md](docs/ide.md) for
+the layout, the first-time capture step and the day-to-day commands.
 
-## MCP Servers Included
+## What's managed
 
-| Server | Purpose |
-|--------|---------|
-| `context7` | Documentation lookup |
-| `fetch` | Web fetching |
-| `sequential-thinking` | Structured reasoning |
-| `memory` | Persistent memory |
-| `playwright` | Browser automation |
-| `supabase` | Database operations |
-| `vercel` | Deployment |
-| `sentry` | Error tracking |
-| `eslint` | Linting |
-| `shadcn` | UI components |
-| `google-maps` | Maps API |
-| `perplexity` | AI search |
+| Area | Files |
+|------|-------|
+| Shell | `.zshrc`, `.zprofile`, `.p10k.zsh`, `.inputrc`, `.zsh/plugin-loader.zsh`, `.zsh/toolsets.zsh`, `.config/fish/config.fish`, `.config/starship.toml` |
+| Git | `.gitconfig` (template), `.gitignore_global` |
+| CLI tools | `.config/bat/config`, `.ripgreprc`, `.fdignore`, `.curlrc`, `.wgetrc`, `.config/gh/config.yml`, `.config/direnv/direnvrc` |
+| Languages | `.config/pip/pip.conf`, `.config/uv/uv.toml`, `.config/ruff/ruff.toml`, `.config/go/env`, `.npmrc`, `.condarc`, `.editorconfig`, `.prettierrc` |
+| AI tooling | `.claude/settings.json`, `.claude/CLAUDE.md`, `.cursor/mcp.json` (template), `.config/zed/settings.json` (template), `.config/goose/config.yaml`, `.serena/serena_config.yml` |
+| IDEs | `.config/ide/vscode/` (rendered Cursor + VS Code settings, keybindings, snippets, profile exports), `.config/jetbrains/` (shared PyCharm/JetBrains settings), `.local/bin/ide-capture` |
+| macOS only | `.config/iterm2/`, `.config/raycast/` (settings only, never tokens) |
 
-## Templates
+## Layout of this repo
 
-For machine-specific configuration, use `.tmpl` files:
+| Entry | Purpose |
+|-------|---------|
+| `.chezmoi.toml.tmpl` | Generates the local chezmoi config; asks for name/email once |
+| `.chezmoiignore` | What not to write to `~`, including OS-specific skips |
+| `.chezmoiexternal.toml` | Third-party downloads (oh-my-zsh and plugins) |
+| `run_onchange_darwin-install-packages.sh.tmpl` | Homebrew package list; re-runs when the list changes |
+| `run_before_ide-backup.sh.tmpl` | Backs up real Cursor/VS Code settings before they become symlinks |
+| `run_onchange_after_ide-extensions.sh.tmpl` | Installs the extension lists; re-runs when a list changes |
+| `run_after_jetbrains-link.sh.tmpl` | Links every JetBrains config folder to `~/.config/jetbrains` |
+| `.chezmoitemplates/ide/` | Settings data files and the templates that merge them |
+| `docs/` | Longer guides, not applied to `~` |
+| `dot_*`, `private_dot_*` | The dotfiles themselves |
+| `*.tmpl` | Files rendered with Go templates per machine |
+| `.gitignore` | Safety net against committing secrets |
 
-```bash
-# Create a template
-chezmoi add --template ~/.gitconfig
-chezmoi edit ~/.gitconfig
-```
-
-Example template (`dot_gitconfig.tmpl`):
-```toml
-[user]
-    name = {{ .name }}
-    email = {{ .email }}
-```
-
-Configure variables in `~/.config/chezmoi/chezmoi.toml`:
-```toml
-[data]
-    name = "Joe Carosella"
-    email = "joe@example.com"
-```
-
-## Ignoring Files
-
-Edit `.chezmoiignore` to exclude files from management:
-
-```
-README.md
-LICENSE
-*.md
-
-# Ignore on specific OS
-{{- if ne .chezmoi.os "darwin" }}
-.config/karabiner/
-{{- end }}
-```
-
-## Troubleshooting
-
-### See what chezmoi would do
-
-```bash
-chezmoi apply -n -v  # Dry run with verbose output
-```
-
-### Check for errors
-
-```bash
-chezmoi doctor       # Diagnose common issues
-chezmoi verify       # Verify target state matches source
-```
-
-### Reset a file to source state
-
-```bash
-chezmoi apply ~/.zshrc --force
-```
-
-### Re-add a file after manual edits
-
-```bash
-chezmoi re-add ~/.zshrc
-```
-
-## Resources
-
-- [chezmoi Documentation](https://chezmoi.io/user-guide/command-overview/)
-- [chezmoi GitHub](https://github.com/twpayne/chezmoi)
-- [Quick Start Guide](https://chezmoi.io/quick-start/)
+Reference: [chezmoi source state attributes](https://www.chezmoi.io/reference/source-state-attributes/).

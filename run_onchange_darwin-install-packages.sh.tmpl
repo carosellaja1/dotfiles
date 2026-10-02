@@ -1,0 +1,39 @@
+{{ if eq .chezmoi.os "darwin" -}}
+#!/bin/bash
+# Installs the CLI tools the dotfiles expect, via Homebrew.
+# "run_onchange_" means chezmoi re-runs this only when its contents change,
+# so edit the package list below and the next `chezmoi apply` installs it.
+set -euo pipefail
+
+# chezmoi runs scripts in a non-login shell, so brew may not be on PATH yet.
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi
+
+if ! command -v brew >/dev/null 2>&1; then
+  echo "Homebrew not found; skipping package install." >&2
+  echo "Install it from https://brew.sh and run 'chezmoi apply' again." >&2
+  exit 0
+fi
+
+brew bundle --file=/dev/stdin <<BREWFILE
+# Referenced by .zshrc / .gitconfig / .config
+brew "bat"          # cat replacement, ~/.config/bat/config
+brew "eza"          # ls replacement
+brew "fd"           # find replacement, ~/.fdignore
+brew "ripgrep"      # grep replacement, ~/.ripgreprc
+brew "git-delta"    # git pager, .gitconfig core.pager
+brew "git-lfs"      # .gitconfig filter "lfs"
+brew "direnv"       # ~/.config/direnv/direnvrc
+brew "zoxide"       # smarter cd
+brew "starship"     # ~/.config/starship.toml
+brew "gh"           # ~/.config/gh/config.yml
+brew "jq"           # Claude Code status line
+brew "shellcheck"
+brew "shfmt"
+brew "uv"           # ~/.config/uv/uv.toml
+brew "chezmoi"
+BREWFILE
+{{ end -}}

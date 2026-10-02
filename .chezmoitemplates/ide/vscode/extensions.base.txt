@@ -1,0 +1,8 @@
+# One extension id per line. Installed into the default profile of Cursor and
+# VS Code by run_onchange_after_ide-extensions.sh.tmpl. Lines starting with #
+# are ignored. Find ids on the marketplace page ("Identifier") or with
+#   code --list-extensions
+esbenp.prettier-vscode
+editorconfig.editorconfig
+dbaeumer.vscode-eslint
+eamodio.gitlens

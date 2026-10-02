@@ -1,0 +1,8 @@
+# Safety net: real secrets must never land in this repo, even via `chezmoi add`.
+**/api-keys.env
+**/hosts.yml
+**/raycast/config.json
+**/raycast/ai/providers.yaml
+**/.credentials.json
+
+.DS_Store

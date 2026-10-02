@@ -1,0 +1,8 @@
+{{- /* Renders settings.json for one app.
+       Usage: {{ template "ide/vscode/settings" (dict "root" . "app" "code") }}
+       Merge order (later wins): base -> app (code|cursor) -> machine profile */ -}}
+{{- $root := .root -}}
+{{- $base := include ".chezmoitemplates/ide/vscode/settings.base.json" | fromJson -}}
+{{- $app := include (printf ".chezmoitemplates/ide/vscode/settings.%s.json" .app) | fromJson -}}
+{{- $machine := include (printf ".chezmoitemplates/ide/vscode/settings.%s.json" $root.profile) | fromJson -}}
+{{ mergeOverwrite (deepCopy $base) $app $machine | toPrettyJson }}

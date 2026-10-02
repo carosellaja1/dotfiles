@@ -1,21 +1,27 @@
-# Ignore plugins directory - managed by plugin-loader.zsh
-.zsh/plugins/
+# .chezmoiignore is a Go template. Patterns listed here are NOT written to $HOME.
 
-# Repo files (not dotfiles)
+# Repo-only files
 README.md
 LICENSE
+docs/
 
-# Secrets (only template is managed, not actual secrets)
+# ---------------------------------------------------------------------------
+# Secrets and per-machine state. These must never be managed by chezmoi, even
+# if `chezmoi add` is run on their parent directory by mistake.
+# ---------------------------------------------------------------------------
 .config/secrets/api-keys.env
+.config/gh/hosts.yml
+.config/raycast/config.json
+.config/raycast/ai/providers.yaml
+.claude/.credentials.json
 
-# IDE state files (not settings)
+# IDE / agent state (not settings)
 .cursor/extensions/
 .cursor/projects/
 .cursor/worktrees/
 .cursor/ai-tracking/
 .cursor/ide_state.json
 .cursor/argv.json
-.claude/.credentials.json
 .claude/history.jsonl
 .claude/stats-cache.json
 .claude/debug/
@@ -33,13 +39,32 @@ LICENSE
 .claude/chrome/
 .claude/agents/
 .claude/settings.local.json
+.serena/language_servers/
 
-# Common files to ignore
+# Local backups made by run_before_ide-backup.sh
+.config/ide/vscode/backup/
+
+# Zsh plugins are cloned at runtime by ~/.zsh/plugin-loader.zsh
+.zsh/plugins/
+
+# Common junk
 .DS_Store
 *.swp
 *.swo
 *~
-
-# ZSH compiled files
 *.zwc
 *.zwc.old
+
+{{ if ne .chezmoi.os "darwin" -}}
+# ---------------------------------------------------------------------------
+# macOS-only entries, skipped on {{ .chezmoi.os }}
+# ---------------------------------------------------------------------------
+.config/iterm2
+.config/raycast
+.zprofile
+Library
+{{ else -}}
+# Linux-only IDE paths, skipped on macOS (which uses ~/Library/Application Support)
+.config/Code
+.config/Cursor
+{{ end -}}
