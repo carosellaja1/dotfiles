@@ -7,9 +7,13 @@ fi
 # Oh My Zsh Configuration
 # ============================================
 
+# oh-my-zsh, powerlevel10k and zsh-autosuggestions are installed and refreshed
+# by chezmoi (see .chezmoiexternal.toml), so oh-my-zsh's own updater is off.
 export ZSH="$HOME/.oh-my-zsh"
+export ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/oh-my-zsh"
+[[ -d "$ZSH_CACHE_DIR/completions" ]] || mkdir -p "$ZSH_CACHE_DIR/completions"
 ZSH_THEME="powerlevel10k/powerlevel10k"
-zstyle ':omz:update' mode auto
+zstyle ':omz:update' mode disabled
 ENABLE_CORRECTION="true"
 
 plugins=(
@@ -17,7 +21,11 @@ plugins=(
   zsh-autosuggestions
 )
 
-source $ZSH/oh-my-zsh.sh
+if [[ -f "$ZSH/oh-my-zsh.sh" ]]; then
+  source "$ZSH/oh-my-zsh.sh"
+else
+  echo "oh-my-zsh not found at $ZSH; run 'chezmoi apply' to install it" >&2
+fi
 
 # ============================================
 # Zsh Options

@@ -1,6 +1,7 @@
 [user]
-	name = Joe Carosella
-	email = carosellaja1@gmail.com
+	# Set per machine by `chezmoi init` (see .chezmoi.toml.tmpl)
+	name = {{ .name }}
+	email = {{ .email }}
 
 [core]
 	# Use global gitignore
@@ -77,7 +78,11 @@
 	concurrent = true
 
 [credential]
+{{- if eq .chezmoi.os "darwin" }}
 	helper = osxkeychain
+{{- else }}
+	helper = cache --timeout=3600
+{{- end }}
 
 [filter "lfs"]
 	clean = git-lfs clean -- %f

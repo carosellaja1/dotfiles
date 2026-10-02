@@ -1,10 +1,8 @@
+# Login-shell setup. Kept small on purpose; interactive config lives in .zshrc.
 
-eval "$(/opt/homebrew/bin/brew shellenv)"
-
-# Setting PATH for Python 3.14
-# The original version is saved in .zprofile.pysave
-PATH="/Library/Frameworks/Python.framework/Versions/3.14/bin:${PATH}"
-export PATH
-
-# Added by `rbenv init` on Sun Dec  7 23:54:10 EST 2025
-eval "$(rbenv init - --no-rehash zsh)"
+# Homebrew: Apple Silicon, then Intel
+if [[ -x /opt/homebrew/bin/brew ]]; then
+  eval "$(/opt/homebrew/bin/brew shellenv)"
+elif [[ -x /usr/local/bin/brew ]]; then
+  eval "$(/usr/local/bin/brew shellenv)"
+fi

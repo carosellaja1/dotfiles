@@ -1,0 +1,13 @@
+{{/* This file generates ~/.config/chezmoi/chezmoi.toml on each machine.
+     Values are asked for ONCE on `chezmoi init` and then remembered locally.
+     Re-run `chezmoi init` to be asked again. */ -}}
+{{- $name := promptStringOnce . "name" "Full name for git commits" "Joe Carosella" -}}
+{{- $email := promptStringOnce . "email" "Email for git commits" -}}
+
+[data]
+    name = {{ $name | quote }}
+    email = {{ $email | quote }}
+
+[diff]
+    # Don't show the full contents of run_* scripts in `chezmoi diff`
+    exclude = ["scripts"]
